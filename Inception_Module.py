@@ -1,11 +1,3 @@
-
-# coding: utf-8
-
-# <img src="inceptionmodule.png" alt="Inception Module" style="width: 500px;"/>
-
-# In[1]:
-
-
 class nn:
     
     def __init__(self):
@@ -58,69 +50,4 @@ class nn:
         self.biases[layer_name]=tf.Variable(tf.constant(0.1,shape=[nodes]))
         return tf.matmul(inp,self.weights[layer_name]) + self.biases[layer_name]
 
-
-# In[2]:
-
-
-import tensorflow  as tf
-import os
-
-
-# In[3]:
-
-
-from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
-
-
-# In[4]:
-
-
-x = tf.placeholder(tf.float32, shape=[None, 784])
-y_ = tf.placeholder(tf.float32, shape=[None, 10])
-
-
-# In[5]:
-
-
-x_reshaped=tf.reshape(x,[-1,28,28,1])
-net=nn()
-c1=net.inception(inp=x_reshaped,layer_name='inception_module_1')
-c2=net.inception(inp=c1,layer_name='inception_module_2')
-f=net.flatten(c2)
-out_logits=net.logits(f,nodes=10)
-
-
-# In[6]:
-
-
-cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=out_logits))
-train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
-correct_prediction = tf.equal(tf.argmax(out_logits, 1), tf.argmax(y_, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-
-
-# In[ ]:
-
-
-with tf.Session() as sess:
-    sess.run(tf.global_variables_initializer())
-    batch_size=500
-    #saver.restore(sess, '/home/vamsi/models/mnist/10.cptk')
-    #writer=tf.summary.FileWriter('/tmp/mnist')
-    #writer.add_graph(sess.graph)
-    for i in range(3300):
-        
-        batch = mnist.train.next_batch(batch_size)
-        if i % 110 == 0:
-                train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1]})
-                print('after %d epochs, training accuracy %g           test accuracy %g'                      % (i//110, train_accuracy,accuracy.eval(feed_dict={x: mnist.test.images[:500],                                                                                 y_: mnist.test.labels[:500]})))
-            
-        
-        train_step.run(feed_dict={x: batch[0], y_: batch[1]})
-        #if i % 100 == 10:
-                #if not os.path.exists(model_directory):
-                #    os.makedirs(model_directory)      
-                #saver.save(sess, save_path = model_directory + '/' + str(i) + '.cptk')
-        
 
